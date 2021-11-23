@@ -1,10 +1,12 @@
 package com.fortunebill.cache.entities;
 
+import java.io.Serializable;
+
 /**
  * @author Kevin
  * @date 2021年11月19日12:05
  */
-public class Employee {
+public class Employee implements Serializable {
     private Integer id;
 
     private String lastName;
