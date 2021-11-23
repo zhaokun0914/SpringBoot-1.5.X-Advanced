@@ -2,10 +2,9 @@ package com.fortunebill.cache.mapper;
 
 import com.fortunebill.cache.entities.Employee;
 import com.fortunebill.cache.entities.EmployeeExample;
-import java.util.List;
-
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @author Kevin

@@ -7,7 +7,7 @@ package com.fortunebill.cache.entities;
 public class Department {
     private Integer id;
 
-    private String departmentname;
+    private String departmentName;
 
     public Integer getId() {
         return id;
@@ -17,11 +17,11 @@ public class Department {
         this.id = id;
     }
 
-    public String getDepartmentname() {
-        return departmentname;
+    public String getDepartmentName() {
+        return departmentName;
     }
 
-    public void setDepartmentname(String departmentname) {
-        this.departmentname = departmentname == null ? null : departmentname.trim();
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName == null ? null : departmentName.trim();
     }
 }

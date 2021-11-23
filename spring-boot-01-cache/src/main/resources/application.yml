@@ -3,14 +3,15 @@ spring:
     # 数据源基本配置
     username: root
     password: 123456
-    # url: jdbc:mysql://192.168.5.231:3306/spring_cache?useSSL=false&&useUnicode=true&&characterEncoding=utf8
-    url: jdbc:mysql://192.168.1.52:3306/spring_cache?useSSL=false&&useUnicode=true&&characterEncoding=utf8
+    url: jdbc:mysql://192.168.5.252:3306/spring_cache?useSSL=false&&useUnicode=true&&characterEncoding=utf8
+#    url: jdbc:mysql://192.168.1.52:3306/spring_cache?useSSL=false&&useUnicode=true&&characterEncoding=utf8
     # useSSL：否则日志中会有warn警告
     # useUnicode：确认启用UTF-8编码
     # characterEncoding：如果不与数据库字符集相同，则会导致存储中文时乱码
     driver-class-name: com.mysql.jdbc.Driver
   redis:
-    host: 192.168.1.52
+    host: 192.168.5.252
+#    host: 192.168.1.52
 
 # xml模式下mybatis的配置
 mybatis:

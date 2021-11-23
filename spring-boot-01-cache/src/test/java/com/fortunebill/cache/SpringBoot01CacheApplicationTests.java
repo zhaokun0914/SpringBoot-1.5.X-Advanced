@@ -1,7 +1,9 @@
 package com.fortunebill.cache;
 
+import com.fortunebill.cache.entities.Department;
 import com.fortunebill.cache.entities.Employee;
 import com.fortunebill.cache.entities.EmployeeExample;
+import com.fortunebill.cache.mapper.DepartmentMapper;
 import com.fortunebill.cache.mapper.EmployeeMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +21,9 @@ public class SpringBoot01CacheApplicationTests {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+
+    @Autowired
+    private DepartmentMapper departmentMapper;
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
@@ -44,7 +49,6 @@ public class SpringBoot01CacheApplicationTests {
      * stringRedisTemplate.opsForSet()[集合];
      * stringRedisTemplate.opsForHash()[散列];
      * stringRedisTemplate.opsForZSet()[有序集合];
-     *
      */
     @Test
     public void testRedis() {
@@ -55,9 +59,13 @@ public class SpringBoot01CacheApplicationTests {
 
     @Test
     public void testRedisSaveObject() {
-        Employee employee = employeeMapper.selectByPrimaryKey(8);
-        myRedisTemplate.opsForValue().set("emp_01", employee);
-//        System.out.println(myRedisTemplate.opsForValue().get("emp_01"));
+        // Employee employee = employeeMapper.selectByPrimaryKey(1);
+        // myRedisTemplate.opsForValue().set("emp_01", employee);
+        // System.out.println(myRedisTemplate.opsForValue().get("emp_01"));
+
+        Department department = departmentMapper.selectByPrimaryKey(1);
+        myRedisTemplate.opsForValue().set("dept_01", department);
+        System.out.println(myRedisTemplate.opsForValue().get("dept_01"));
     }
 
 }

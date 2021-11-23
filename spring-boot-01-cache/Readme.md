@@ -218,7 +218,7 @@
        getEmployee[1]
 
        | 名字          | 位置               | 描述                                                         | 示例                 |
-                            | :------------ | :----------------- | :----------------------------------------------------------- | :------------------- |
+                                   | :------------ | :----------------- | :----------------------------------------------------------- | :------------------- |
        | methodName    | root object        | 当前被调用的方法名                                           | #root.methodName     |
        | method        | root object        | 当前被调用的方法                                             | #root.method.name    |
        | target        | root object        | 当前被调用的目标对象                                         | #root.target         |
@@ -437,3 +437,173 @@
        @CacheConfig(cacheNames = {"emp"})
        public class EmployeeServiceImpl implements EmployeeService {
        ```
+
+### 三、整合Redis
+
+1. 默认使用的是`CurrentMapCacheManager`、`ConcurrentMapCache`将数据保存在`ConcurrentMap<Object>`中，但是我们在开发中使用缓存中间件作为缓存：redis, memcached,ehcache;
+
+2. 整合Redis作为缓存中间件
+
+    1. 安装redis：使用docker
+
+   ```sh
+   [root@kevin kevin]# docker pull redis
+   ```
+
+    2. 引入redis的starter
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-data-redis</artifactId>
+   </dependency>
+   ```
+
+    3. 配置redis
+
+   ```yml
+   spring:
+     redis:
+       host: 192.168.1.252
+   ```
+
+3. redis整合原理
+
+    1. 引入`redis`的`starter`就会自动装配`RedisCacheConfiguration`，并注入两个`RedisTemplate`
+
+   ```java
+   @Configuration
+   @ConditionalOnClass({ JedisConnection.class, RedisOperations.class, Jedis.class })
+   @EnableConfigurationProperties(RedisProperties.class)
+   public class RedisAutoConfiguration {
+       
+       @Configuration
+   	protected static class RedisConfiguration {
+   
+   		@Bean
+   		@ConditionalOnMissingBean(name = "redisTemplate")
+   		public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+   			RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
+   			template.setConnectionFactory(redisConnectionFactory);
+   			return template;
+   		}
+   
+   		@Bean
+   		@ConditionalOnMissingBean(StringRedisTemplate.class)
+   		public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+   			StringRedisTemplate template = new StringRedisTemplate();
+   			template.setConnectionFactory(redisConnectionFactory);
+   			return template;
+   		}
+   
+   	}
+   
+   }
+   ```
+
+    2. `RedisTemplate<Object, Object>`默认的序列化器是`JdkSerializationRedisSerializer`，会导致存储在redis中的内容显示乱码，影响阅读，我们使用`GenericJackson2JsonRedisSerializer`代替默认的序列化器
+
+   ```java
+   public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperations<K, V>, BeanClassLoaderAware {
+       
+   	public void afterPropertiesSet() {
+   
+   		super.afterPropertiesSet();
+   
+   		boolean defaultUsed = false;
+   
+   		if (defaultSerializer == null) {
+   
+   			defaultSerializer = new JdkSerializationRedisSerializer(classLoader != null ? classLoader : this.getClass().getClassLoader());
+   		}
+   
+   		if (enableDefaultSerializer) {
+   
+   			if (keySerializer == null) {
+   				keySerializer = defaultSerializer;
+   				defaultUsed = true;
+   			}
+   			if (valueSerializer == null) {
+   				valueSerializer = defaultSerializer;
+   				defaultUsed = true;
+   			}
+   			if (hashKeySerializer == null) {
+   				hashKeySerializer = defaultSerializer;
+   				defaultUsed = true;
+   			}
+   			if (hashValueSerializer == null) {
+   				hashValueSerializer = defaultSerializer;
+   				defaultUsed = true;
+   			}
+   		}
+   
+   		if (enableDefaultSerializer && defaultUsed) {
+   			Assert.notNull(defaultSerializer, "default serializer null and not all serializers initialized");
+   		}
+   
+   		if (scriptExecutor == null) {
+   			this.scriptExecutor = new DefaultScriptExecutor<K>(this);
+   		}
+   
+   		initialized = true;
+   	}
+   }
+   ```
+
+   ```java
+   @Configuration
+   public class MyRedisConfig {
+   
+       @Bean
+       public RedisTemplate<Object, Object> myRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+           RedisTemplate<Object, Object> template = new RedisTemplate<>();
+           template.setConnectionFactory(redisConnectionFactory);
+           
+           GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer = new GenericJackson2JsonRedisSerializer();
+           StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+   
+           template.setKeySerializer(stringRedisSerializer);
+           template.setValueSerializer(genericJackson2JsonRedisSerializer);
+           return template;
+       }
+   
+   }
+   ```
+
+4. 测试缓存
+
+    1. 引入`redis`的`starter`之后自动匹配`org.springframework.boot.autoconfigure.cache.RedisCacheConfiguration`，会给容器中保存`RedisCacheManager`
+
+    2. `RedisCacheManager`帮我们创建`RedisCache`来作为缓存组件，通过操作Redis来缓存数据
+
+    3. 默认保存数据k-v都是object的时候，利用JDK序列化来保存。如何保存为JSON
+
+        1. 引入了redis的starter，cacheManager变为RedisCacheManager
+        2. 默认创建的RedisCacheManager操作redis的时候使用的是RedisTemplate<Object, Object>
+        3. RedisTemplate<Object, Object>是默认使用JDK的序列化机制
+
+    4. 自定义CacheManager
+
+       ```java
+       @Configuration
+       public class MyRedisConfig {
+       
+           @Bean
+           @Primary
+           public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+               RedisTemplate<Object, Object> template = new RedisTemplate<>();
+               GenericJackson2JsonRedisSerializer genericJackson2JsonRedisSerializer = new GenericJackson2JsonRedisSerializer();
+               template.setDefaultSerializer(genericJackson2JsonRedisSerializer);
+               template.setConnectionFactory(redisConnectionFactory);
+               return template;
+           }
+       
+           @Bean
+           public RedisCacheManager cacheManager(RedisTemplate<Object, Object> redisTemplate) {
+               RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
+               cacheManager.setUsePrefix(true);
+               return cacheManager;
+           }
+       }
+       ```
+

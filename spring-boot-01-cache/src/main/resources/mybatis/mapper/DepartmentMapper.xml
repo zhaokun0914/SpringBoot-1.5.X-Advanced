@@ -3,7 +3,7 @@
 <mapper namespace="com.fortunebill.cache.mapper.DepartmentMapper" >
   <resultMap id="BaseResultMap" type="com.fortunebill.cache.entities.Department" >
     <id column="id" property="id" jdbcType="INTEGER" />
-    <result column="departmentName" property="departmentname" jdbcType="VARCHAR" />
+    <result column="departmentName" property="departmentName" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -98,7 +98,7 @@
   </delete>
   <insert id="insert" parameterType="com.fortunebill.cache.entities.Department" >
     insert into department (id, departmentName)
-    values (#{id,jdbcType=INTEGER}, #{departmentname,jdbcType=VARCHAR})
+    values (#{id,jdbcType=INTEGER}, #{departmentName,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.fortunebill.cache.entities.Department" >
     insert into department
@@ -106,7 +106,7 @@
       <if test="id != null" >
         id,
       </if>
-      <if test="departmentname != null" >
+      <if test="departmentName != null" >
         departmentName,
       </if>
     </trim>
@@ -114,8 +114,8 @@
       <if test="id != null" >
         #{id,jdbcType=INTEGER},
       </if>
-      <if test="departmentname != null" >
-        #{departmentname,jdbcType=VARCHAR},
+      <if test="departmentName != null" >
+        #{departmentName,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -131,8 +131,8 @@
       <if test="record.id != null" >
         id = #{record.id,jdbcType=INTEGER},
       </if>
-      <if test="record.departmentname != null" >
-        departmentName = #{record.departmentname,jdbcType=VARCHAR},
+      <if test="record.departmentName != null" >
+        departmentName = #{record.departmentName,jdbcType=VARCHAR},
       </if>
     </set>
     <if test="_parameter != null" >
@@ -142,7 +142,7 @@
   <update id="updateByExample" parameterType="map" >
     update department
     set id = #{record.id,jdbcType=INTEGER},
-      departmentName = #{record.departmentname,jdbcType=VARCHAR}
+      departmentName = #{record.departmentName,jdbcType=VARCHAR}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -150,15 +150,15 @@
   <update id="updateByPrimaryKeySelective" parameterType="com.fortunebill.cache.entities.Department" >
     update department
     <set >
-      <if test="departmentname != null" >
-        departmentName = #{departmentname,jdbcType=VARCHAR},
+      <if test="departmentName != null" >
+        departmentName = #{departmentName,jdbcType=VARCHAR},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.fortunebill.cache.entities.Department" >
     update department
-    set departmentName = #{departmentname,jdbcType=VARCHAR}
+    set departmentName = #{departmentName,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>
