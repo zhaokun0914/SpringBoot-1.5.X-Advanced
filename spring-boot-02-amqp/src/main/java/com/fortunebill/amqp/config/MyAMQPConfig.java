@@ -12,6 +12,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MyAMQPConfig {
 
+    /**
+     * 给容器中注入一个JSON MessageConverter，这样在 RabbitAutoConfiguration 配置 RabbitTemplate 的时候，
+     * 会先找容器中刚才定义的 MessageConverter，这样保存在消息队列中的消息都是 JSON 格式的。
+     */
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
