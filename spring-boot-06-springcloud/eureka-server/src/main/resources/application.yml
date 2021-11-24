@@ -1,0 +1,11 @@
+# 当前 eureka 这个服务的端口号
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: eureka-server      # eureka 实例的主机名
+  client:
+    register-with-eureka: false  # 指示此实例是否应向 eureka 服务器注册，以供其他人发现
+    fetch-registry: false        # 不从 eureka 上获取服务的注册信息，因为我们是服务端，没必要获取别的服务信息
+    service-url:                 # 指定 eureka 注册中心的地址，其他服务就是要往这里注册
+      defaultZone: http://localhost:8761/eureka/
